@@ -1,0 +1,21 @@
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Backend
+backend/target/
+
+# IDE
+.idea/
+.vscode/
+.settings/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Application logs
+backend/logs/
+*.log
+*.log.*
