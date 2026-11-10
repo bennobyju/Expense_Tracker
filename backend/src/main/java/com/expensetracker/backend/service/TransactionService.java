@@ -92,6 +92,64 @@ public class TransactionService {
 
         return mapToResponse(saved);
     }
+    
+
+public TransactionResponse updateTransaction(
+        Long id, TransactionRequest request) {
+
+    Long authenticatedUserId = getAuthenticatedUserId();
+
+    log.info("Updating transaction ID: {} for User ID: {}",
+            id, authenticatedUserId);
+
+    // 1. Validate amount
+    if (request.getAmount() == null
+            || request.getAmount().signum() <= 0) {
+
+        throw new BadRequestException(
+                "Transaction amount must be greater than zero");
+    }
+
+    // 2. Find existing transaction
+    Transaction transaction = transactionRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException(
+                    "Transaction not found with ID: " + id));
+
+    // 3. Check transaction ownership
+    if (transaction.getUser() == null
+            || !authenticatedUserId.equals(
+                    transaction.getUser().getId())) {
+
+        throw new UnauthorizedException(
+                "You are not authorized to update this transaction");
+    }
+
+    // 4. Find category
+    Category category = null;
+
+    if (request.getCategoryId() != null) {
+        category = categoryRepository.findById(
+                request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Category not found with ID: "
+                                + request.getCategoryId()));
+    }
+
+    // 5. Update transaction fields
+    transaction.setAmount(request.getAmount());
+    transaction.setTransactionDate(request.getTransactionDate());
+    transaction.setDescription(request.getDescription());
+    transaction.setType(request.getType());
+    transaction.setCategory(category);
+
+    // 6. Save changes in database
+    Transaction updated = transactionRepository.save(transaction);
+
+    log.info("Transaction ID: {} successfully updated", id);
+
+    return mapToResponse(updated);
+}
+
 
     public void deleteTransaction(Long id) {
         Long authenticatedUserId = getAuthenticatedUserId();

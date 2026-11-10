@@ -189,7 +189,7 @@ describe('LoginPage Component', () => {
     await user.click(screen.getByRole('button', { name: /create account/i }))
 
     expect(screen.getByRole('alert')).toHaveTextContent(
-      'Password must be at least 6 characters.'
+      'Password must be at least 8 characters.'
     )
 
     expect(axios.post).not.toHaveBeenCalled()
